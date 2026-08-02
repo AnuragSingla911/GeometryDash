@@ -1302,7 +1302,7 @@
     }
 
     update(dt, gameSpeed, envId, distance, slowMo) {
-      const difficulty = clamp(distance / 8000, 0, 1);
+      const difficulty = clamp(Math.pow(distance / 12000, 1.15), 0, 1);
       const speed = slowMo ? gameSpeed * 0.45 : gameSpeed;
 
       // Update existing

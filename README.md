@@ -2,9 +2,19 @@
 
 A fast, colourful 2D side-scrolling platformer inspired by the feel of Geometry Dash — built entirely with **HTML, CSS, and JavaScript** using the HTML5 Canvas API. No frameworks, no build step, no copyrighted assets.
 
+**Play online:** [https://anuragsingla911.github.io/GeometryDash/](https://anuragsingla911.github.io/GeometryDash/)
+
 Your futuristic robot runs automatically. Jump, double-jump, collect coins, grab power-ups, and survive desert roads, neon cities, and dangerous factories as the pace ramps up.
 
 ## How to run
+
+### Online (GitHub Pages)
+
+Open: [https://anuragsingla911.github.io/GeometryDash/](https://anuragsingla911.github.io/GeometryDash/)
+
+The site deploys automatically from `main` to the `gh-pages` branch (same pattern as [21Dares](https://anuragsingla911.github.io/21Dares/)).
+
+### Locally
 
 1. Open `index.html` in a modern browser (Chrome, Firefox, Safari, Edge).
 2. That’s it — no server or install required.

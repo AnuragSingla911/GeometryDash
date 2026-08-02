@@ -36,7 +36,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
           publish_branch: gh-pages
-          # Wipe prior gh-pages history/files so a deleted CNAME cannot linger
+          # Wipe prior gh-pages files so a deleted CNAME cannot linger
           force_orphan: true
-          # Do not publish a custom domain
-          cname: ""

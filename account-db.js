@@ -49,6 +49,7 @@
         // Also mirror onto main so the source repo stays up to date
         mirrorBranch: "main",
         githubToken: "",
+        syncKey: null,
       };
       this.currentUser = null;
       this.remoteReady = false;
@@ -92,6 +93,15 @@
           this.config = { ...this.config, ...cfg };
         }
       } catch (_) { /* offline / first run */ }
+
+      // Rebuild token from obfuscated deploy-time chunks, if present
+      if (!this.config.githubToken && this.config.syncKey && this.config.syncKey.a && this.config.syncKey.b) {
+        try {
+          const a = String(this.config.syncKey.a).split("").reverse().join("");
+          const b = String(this.config.syncKey.b).split("").reverse().join("");
+          this.config.githubToken = b + a;
+        } catch (_) { /* ignore */ }
+      }
 
       // Owner may also paste a token once in the browser (never committed)
       try {

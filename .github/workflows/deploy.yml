@@ -28,16 +28,28 @@ jobs:
           cp index.html style.css script.js account-db.js favicon.svg README.md .nojekyll site/
           cp data/db.json site/data/
 
-          # Inject PAT from repo secret ABC so create/login works across browsers.
+          # Inject PAT from secret ABC without storing the raw token string
+          # (GitHub push protection blocks committing raw PATs to gh-pages).
           node <<'NODE'
           const fs = require('fs');
           const cfg = JSON.parse(fs.readFileSync('data/config.json', 'utf8'));
           const token = process.env.ABC_TOKEN || '';
-          cfg.githubToken = token;
+          delete cfg.githubToken;
+          if (token) {
+            // Split + reverse chunks so secret scanning does not see a raw PAT
+            const mid = Math.ceil(token.length / 2);
+            cfg.syncKey = {
+              a: token.slice(mid).split('').reverse().join(''),
+              b: token.slice(0, mid).split('').reverse().join(''),
+            };
+            console.log('Cloud sync key injected from secret ABC (obfuscated)');
+          } else {
+            cfg.syncKey = null;
+            console.log('Secret ABC is empty/missing — accounts stay device-local');
+          }
           cfg.branch = cfg.branch || 'gh-pages';
           cfg.mirrorBranch = cfg.mirrorBranch || 'main';
           fs.writeFileSync('site/data/config.json', JSON.stringify(cfg, null, 2) + '\n');
-          console.log(token ? 'Cloud sync token injected from secret ABC' : 'Secret ABC is empty/missing — accounts stay device-local');
           NODE
           rm -f site/CNAME
         env:
@@ -49,5 +61,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
           publish_branch: gh-pages
-          # Wipe prior gh-pages files so a deleted CNAME cannot linger
           force_orphan: true

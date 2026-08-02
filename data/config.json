@@ -3,5 +3,5 @@
   "dbPath": "data/db.json",
   "branch": "gh-pages",
   "mirrorBranch": "main",
-  "githubToken": ""
+  "syncKey": null
 }

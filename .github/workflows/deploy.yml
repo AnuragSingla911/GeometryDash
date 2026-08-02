@@ -27,6 +27,8 @@ jobs:
           mkdir -p site/data
           cp index.html style.css script.js account-db.js favicon.svg README.md .nojekyll site/
           cp data/db.json data/config.json site/data/
+          # Ensure no custom-domain CNAME sneaks into gh-pages
+          rm -f site/CNAME
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -34,3 +36,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
           publish_branch: gh-pages
+          # Wipe prior gh-pages history/files so a deleted CNAME cannot linger
+          force_orphan: true
+          # Do not publish a custom domain
+          cname: ""

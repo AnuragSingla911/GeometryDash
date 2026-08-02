@@ -33,11 +33,22 @@ Saved per account:
 
 Passwords are salted SHA-256 hashes (never stored in plain text).
 
-### Enable cloud sync (optional)
+### Enable cloud sync (needed for other browsers / devices)
+
+Without cloud sync, accounts live only in that browser’s `localStorage`.
+
+**Option A — repo secret (recommended, works for all visitors):**
 
 1. Create a [fine-grained PAT](https://github.com/settings/personal-access-tokens) with **Contents: Read and write** on `AnuragSingla911/GeometryDash` only.  
-2. In the game: **Account → Cloud sync** → paste the token → **Save Token & Sync**.  
-3. The token stays in your browser `localStorage` (not committed). You can also put it in `data/config.json` as `githubToken` for your own private fork (do not commit secrets to a public repo).
+2. Repo → **Settings → Secrets and variables → Actions → New repository secret**  
+   - Name: `DB_SYNC_TOKEN`  
+   - Value: your PAT  
+3. Push to `main` (or re-run **Deploy to GitHub Pages**). The token is injected into the live `data/config.json`.
+
+**Option B — paste token in the game (this browser only as the sync publisher):**
+
+1. In the game: **Account → Cloud sync** → paste the PAT → **Save Token & Sync Now**.  
+2. That browser can publish accounts/scores to `data/db.json` on `gh-pages`.
 
 You can also **Export Save JSON** from the Account screen and commit it as `data/db.json` manually.
 

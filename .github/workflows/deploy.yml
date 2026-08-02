@@ -26,9 +26,23 @@ jobs:
         run: |
           mkdir -p site/data
           cp index.html style.css script.js account-db.js favicon.svg README.md .nojekyll site/
-          cp data/db.json data/config.json site/data/
-          # Ensure no custom-domain CNAME sneaks into gh-pages
+          cp data/db.json site/data/
+
+          # Inject optional DB_SYNC_TOKEN so create/login works across browsers.
+          # Add a fine-grained PAT (Contents: Read/Write on this repo) as repo secret DB_SYNC_TOKEN.
+          node <<'NODE'
+          const fs = require('fs');
+          const cfg = JSON.parse(fs.readFileSync('data/config.json', 'utf8'));
+          const token = process.env.DB_SYNC_TOKEN || '';
+          cfg.githubToken = token;
+          cfg.branch = cfg.branch || 'gh-pages';
+          cfg.mirrorBranch = cfg.mirrorBranch || 'main';
+          fs.writeFileSync('site/data/config.json', JSON.stringify(cfg, null, 2) + '\n');
+          console.log(token ? 'Cloud sync token injected into config.json' : 'No DB_SYNC_TOKEN secret — accounts stay device-local until configured');
+          NODE
           rm -f site/CNAME
+        env:
+          DB_SYNC_TOKEN: ${{ secrets.DB_SYNC_TOKEN }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

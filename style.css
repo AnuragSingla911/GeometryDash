@@ -639,10 +639,10 @@ body {
   line-height: 1.5;
 }
 
-.sync-details {
-  margin-bottom: 0.85rem;
-  color: var(--text-dim);
-  font-size: 0.85rem;
+.cloud-status {
+  margin-top: 0.45rem;
+  font-size: 0.8rem;
+  color: var(--accent-gold);
 }
 
 .sync-details summary {

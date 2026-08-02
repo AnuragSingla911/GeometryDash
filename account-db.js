@@ -4,8 +4,11 @@
  * Storage layers:
  *  1. localStorage  — instant create/login & progress on this device
  *  2. data/db.json  — shared JSON database served by GitHub Pages
- *  3. Optional GitHub Contents API sync (when a fine-grained PAT is set
- *     in data/config.json) so the owner can manage accounts in the repo
+ *  3. GitHub Contents API sync (when a fine-grained PAT is available via
+ *     data/config.json or localStorage) so accounts work across browsers
+ *
+ * Sync writes to the gh-pages branch so the live site picks up new
+ * accounts without waiting for a full main→Pages deploy cycle.
  */
 (function (global) {
   "use strict";
@@ -41,12 +44,17 @@
       this.config = {
         repo: "AnuragSingla911/GeometryDash",
         dbPath: "data/db.json",
-        branch: "main",
+        // Live Pages is served from gh-pages — sync there for cross-browser login
+        branch: "gh-pages",
+        // Also mirror onto main so the source repo stays up to date
+        mirrorBranch: "main",
         githubToken: "",
       };
       this.currentUser = null;
       this.remoteReady = false;
+      this.cloudEnabled = false;
       this.lastError = null;
+      this.lastSyncResult = null;
     }
 
     async init() {
@@ -90,38 +98,52 @@
         const t = localStorage.getItem("robotRushGithubToken");
         if (t) this.config.githubToken = t;
       } catch (_) { /* ignore */ }
+
+      this.cloudEnabled = !!this.config.githubToken;
     }
 
     async _loadRemote() {
       try {
-        const res = await fetch("./data/db.json", { cache: "no-store" });
+        const res = await fetch(`./data/db.json?t=${Date.now()}`, { cache: "no-store" });
         if (!res.ok) return;
         const remote = await res.json();
         if (!remote || !remote.accounts) return;
         this.remoteReady = true;
-        // Merge remote accounts into local (remote wins on newer updatedAt per user)
-        for (const [user, acc] of Object.entries(remote.accounts)) {
-          const local = this.db.accounts[user];
-          if (!local) {
-            this.db.accounts[user] = acc;
-          } else {
-            const lt = Date.parse(local.updatedAt || 0) || 0;
-            const rt = Date.parse(acc.updatedAt || 0) || 0;
-            if (rt >= lt) this.db.accounts[user] = this._mergeAccounts(local, acc);
-            else this.db.accounts[user] = this._mergeAccounts(acc, local);
-          }
-        }
-        // Merge leaderboard (keep top unique by username+difficulty)
-        const board = [...(remote.leaderboard || []), ...(this.db.leaderboard || [])];
-        this.db.leaderboard = this._dedupeLeaderboard(board);
+        this._mergeRemote(remote);
         this._saveLocal();
       } catch (_) {
         this.remoteReady = false;
       }
     }
 
+    /** Force-refresh shared DB from GitHub Pages (used before login). */
+    async refreshFromCloud() {
+      await this._loadRemote();
+      return this.remoteReady;
+    }
+
+    _mergeRemote(remote) {
+      for (const [user, acc] of Object.entries(remote.accounts || {})) {
+        const local = this.db.accounts[user];
+        if (!local) {
+          this.db.accounts[user] = acc;
+        } else {
+          const lt = Date.parse(local.updatedAt || 0) || 0;
+          const rt = Date.parse(acc.updatedAt || 0) || 0;
+          if (rt >= lt) this.db.accounts[user] = this._mergeAccounts(local, acc);
+          else this.db.accounts[user] = this._mergeAccounts(acc, local);
+        }
+      }
+      const board = [...(remote.leaderboard || []), ...(this.db.leaderboard || [])];
+      this.db.leaderboard = this._dedupeLeaderboard(board);
+      if (remote.updatedAt) {
+        const ru = Date.parse(remote.updatedAt) || 0;
+        const lu = Date.parse(this.db.updatedAt || 0) || 0;
+        if (ru > lu) this.db.updatedAt = remote.updatedAt;
+      }
+    }
+
     _mergeAccounts(older, newer) {
-      // Prefer newer progress fields but keep higher scores
       const out = {
         ...older,
         ...newer,
@@ -192,6 +214,10 @@
       return !!this.currentUser && !!this.db.accounts[this.currentUser];
     }
 
+    hasCloudSync() {
+      return !!this.config.githubToken;
+    }
+
     async createAccount(username, password) {
       const user = String(username || "").trim().toLowerCase();
       if (!/^[a-z0-9_]{3,16}$/.test(user)) {
@@ -200,6 +226,10 @@
       if (!password || String(password).length < 4) {
         throw new Error("Password must be at least 4 characters");
       }
+
+      // Pull latest shared DB so we don't miss accounts created elsewhere
+      await this.refreshFromCloud();
+
       if (this.db.accounts[user]) throw new Error("Username already taken");
 
       const salt = crypto.getRandomValues(new Uint8Array(8))
@@ -216,14 +246,32 @@
       };
       this._saveLocal();
       this._setSession(user);
-      await this.syncToGithub();
+
+      const sync = await this.syncToGithub();
+      this.lastSyncResult = sync;
+      if (!sync.ok) {
+        // Keep the local account, but warn the caller
+        const err = new Error(
+          sync.skipped
+            ? "Account saved on this device only. Enable Cloud Sync (Account → Cloud sync) so you can log in from other browsers."
+            : `Account saved locally, but cloud sync failed: ${sync.error || "unknown error"}`
+        );
+        err.code = sync.skipped ? "LOCAL_ONLY" : "SYNC_FAILED";
+        err.account = this.db.accounts[user];
+        throw err;
+      }
       return this.db.accounts[user];
     }
 
     async login(username, password) {
       const user = String(username || "").trim().toLowerCase();
-      const acc = this.db.accounts[user];
-      if (!acc) throw new Error("Account not found");
+
+      // Always refresh from shared DB first (other browsers / devices)
+      await this.refreshFromCloud();
+
+      let acc = this.db.accounts[user];
+      if (!acc) throw new Error("Account not found. Create one, or enable Cloud Sync on the browser where you registered.");
+
       const passHash = await sha256(`${acc.salt}:${password}`);
       if (passHash !== acc.passHash) throw new Error("Wrong password");
       this._setSession(user);
@@ -275,7 +323,6 @@
         const p = this.db.accounts[username].progress;
         return (p && p[difficulty] && p[difficulty].highScore) || 0;
       }
-      // Guest: fall back to legacy key + best on leaderboard for difficulty
       try {
         const legacy = parseInt(localStorage.getItem("robotRushHighScore") || "0", 10) || 0;
         const boardBest = this.db.leaderboard
@@ -293,70 +340,91 @@
 
     setGithubToken(token) {
       this.config.githubToken = token || "";
+      this.cloudEnabled = !!this.config.githubToken;
       try {
         if (token) localStorage.setItem("robotRushGithubToken", token);
         else localStorage.removeItem("robotRushGithubToken");
       } catch (_) { /* ignore */ }
     }
 
+    _payload() {
+      return {
+        version: this.db.version || 1,
+        updatedAt: new Date().toISOString(),
+        accounts: this.db.accounts,
+        leaderboard: this.db.leaderboard.slice(0, 50),
+      };
+    }
+
+    async _putDbToBranch(branch) {
+      const token = this.config.githubToken;
+      const { repo, dbPath } = this.config;
+      const apiBase = `https://api.github.com/repos/${repo}/contents/${dbPath}`;
+
+      let sha = null;
+      const getRes = await fetch(`${apiBase}?ref=${encodeURIComponent(branch)}`, {
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (getRes.ok) {
+        const meta = await getRes.json();
+        sha = meta.sha;
+      } else if (getRes.status !== 404) {
+        const err = await getRes.json().catch(() => ({}));
+        throw new Error(err.message || `Could not read db on ${branch} (${getRes.status})`);
+      }
+
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(this._payload(), null, 2))));
+      const putRes = await fetch(apiBase, {
+        method: "PUT",
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: `chore(db): sync player data (${this.currentUser || "system"})`,
+          content,
+          branch,
+          sha: sha || undefined,
+        }),
+      });
+      if (!putRes.ok) {
+        const err = await putRes.json().catch(() => ({}));
+        throw new Error(err.message || `GitHub sync failed on ${branch} (${putRes.status})`);
+      }
+      return true;
+    }
+
     /**
-     * Push local db.json to GitHub so it can be managed in the repo / Pages.
+     * Push local db.json to GitHub (gh-pages for live Pages, main as mirror).
      * Requires a fine-grained PAT with Contents: Read & Write on this repo.
      */
     async syncToGithub() {
       const token = this.config.githubToken;
       if (!token) {
         this.lastError = null;
-        return { ok: false, skipped: true };
+        this.lastSyncResult = { ok: false, skipped: true };
+        return this.lastSyncResult;
       }
-      const { repo, dbPath, branch } = this.config;
-      const apiBase = `https://api.github.com/repos/${repo}/contents/${dbPath}`;
       try {
-        // Get current file SHA
-        let sha = null;
-        const getRes = await fetch(`${apiBase}?ref=${encodeURIComponent(branch)}`, {
-          headers: {
-            Accept: "application/vnd.github+json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (getRes.ok) {
-          const meta = await getRes.json();
-          sha = meta.sha;
+        const branches = [this.config.branch || "gh-pages"];
+        if (this.config.mirrorBranch && this.config.mirrorBranch !== branches[0]) {
+          branches.push(this.config.mirrorBranch);
         }
-
-        // Public-safe payload (include hashes so cross-device login works)
-        const payload = {
-          version: this.db.version || 1,
-          updatedAt: new Date().toISOString(),
-          accounts: this.db.accounts,
-          leaderboard: this.db.leaderboard.slice(0, 50),
-        };
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
-        const putRes = await fetch(apiBase, {
-          method: "PUT",
-          headers: {
-            Accept: "application/vnd.github+json",
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: `chore(db): sync player data (${this.currentUser || "system"})`,
-            content,
-            branch,
-            sha: sha || undefined,
-          }),
-        });
-        if (!putRes.ok) {
-          const err = await putRes.json().catch(() => ({}));
-          this.lastError = err.message || `GitHub sync failed (${putRes.status})`;
-          return { ok: false, error: this.lastError };
+        for (const branch of branches) {
+          await this._putDbToBranch(branch);
         }
         this.lastError = null;
-        return { ok: true };
+        this.lastSyncResult = { ok: true, branches };
+        // Re-read from Pages shortly after (caller may wait)
+        return this.lastSyncResult;
       } catch (e) {
         this.lastError = e.message || "GitHub sync failed";
-        return { ok: false, error: this.lastError };
+        this.lastSyncResult = { ok: false, error: this.lastError };
+        return this.lastSyncResult;
       }
     }
 

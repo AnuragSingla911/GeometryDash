@@ -47,7 +47,7 @@
     <div id="account-screen" class="screen">
       <div class="screen-panel account-panel">
         <h2>Player Account</h2>
-        <p class="account-note">Saves scores &amp; progress in a JSON database on GitHub Pages (no server).</p>
+        <p class="account-note">Saves scores &amp; progress in <code>data/db.json</code> on GitHub Pages (no server). Cross-browser login needs Cloud Sync enabled once.</p>
 
         <div id="account-logged-out">
           <div class="auth-tabs">
@@ -78,10 +78,10 @@
         <p id="account-message" class="form-message" role="status"></p>
 
         <details class="sync-details">
-          <summary>Cloud sync (GitHub)</summary>
-          <p class="account-note">Optional: paste a fine-grained PAT with Contents write on this repo to publish <code>data/db.json</code>.</p>
+          <summary>Cloud sync (required for other browsers)</summary>
+          <p class="account-note">Paste a fine-grained GitHub PAT with <strong>Contents: Read and write</strong> on this repo. Or add repo secret <code>DB_SYNC_TOKEN</code> so every visitor gets sync automatically.</p>
           <label>GitHub token<input id="github-token" type="password" autocomplete="off" placeholder="github_pat_…" /></label>
-          <button id="btn-save-token" class="btn btn-secondary" type="button">Save Token &amp; Sync</button>
+          <button id="btn-save-token" class="btn btn-secondary" type="button">Save Token &amp; Sync Now</button>
         </details>
 
         <button id="btn-close-account" class="btn btn-primary" type="button">Back</button>

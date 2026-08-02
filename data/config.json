@@ -1,6 +1,7 @@
 {
   "repo": "AnuragSingla911/GeometryDash",
   "dbPath": "data/db.json",
-  "branch": "main",
+  "branch": "gh-pages",
+  "mirrorBranch": "main",
   "githubToken": ""
 }

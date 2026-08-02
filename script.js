@@ -2110,9 +2110,10 @@
     }
 
     _refreshAccountUI() {
+      const cloud = this.accounts.hasCloudSync();
       if (this.accounts.isLoggedIn()) {
         const acc = this.accounts.getAccount();
-        this.ui.setAccountStatus(`👤 ${acc.username}`);
+        this.ui.setAccountStatus(`👤 ${acc.username}${cloud ? " · ☁" : ""}`);
         document.getElementById("account-logged-out").classList.add("hidden");
         document.getElementById("account-logged-in").classList.remove("hidden");
         document.getElementById("account-username").textContent = acc.username;
@@ -2122,9 +2123,10 @@
           `<div>Easy best: <strong>${(p.easy && p.easy.highScore) || 0}</strong></div>` +
           `<div>Medium best: <strong>${(p.medium && p.medium.highScore) || 0}</strong></div>` +
           `<div>Hard best: <strong>${(p.hard && p.hard.highScore) || 0}</strong></div>` +
-          `<div>Furthest: <strong>${p.furthestEnv || "desert"}</strong></div>`;
+          `<div>Furthest: <strong>${p.furthestEnv || "desert"}</strong></div>` +
+          `<div class="cloud-status">${cloud ? "☁ Cloud sync ON" : "⚠ Cloud sync OFF — other browsers won't see this account"}</div>`;
       } else {
-        this.ui.setAccountStatus("Playing as Guest");
+        this.ui.setAccountStatus(cloud ? "Playing as Guest · ☁ ready" : "Playing as Guest");
         document.getElementById("account-logged-out").classList.remove("hidden");
         document.getElementById("account-logged-in").classList.add("hidden");
       }
@@ -2201,9 +2203,11 @@
       click("btn-save-token", async () => {
         const token = document.getElementById("github-token").value.trim();
         this.accounts.setGithubToken(token);
+        this._setAccountMessage("Syncing…");
         const res = await this.accounts.syncToGithub();
-        if (res.skipped) this._setAccountMessage("Token saved locally. Sync skipped (empty?).", true);
-        else if (res.ok) this._setAccountMessage("Synced data/db.json to GitHub ✓");
+        this._refreshAccountUI();
+        if (res.skipped) this._setAccountMessage("Enter a GitHub PAT first (Contents write on this repo).", true);
+        else if (res.ok) this._setAccountMessage("Cloud sync OK — accounts will work in other browsers ✓");
         else this._setAccountMessage(res.error || "Sync failed", true);
       });
 
@@ -2229,6 +2233,7 @@
       document.getElementById("form-login").addEventListener("submit", async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        this._setAccountMessage("Checking cloud database…");
         try {
           await this.accounts.login(
             document.getElementById("login-user").value,
@@ -2249,6 +2254,7 @@
       document.getElementById("form-create").addEventListener("submit", async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        this._setAccountMessage("Creating account…");
         try {
           await this.accounts.createAccount(
             document.getElementById("create-user").value,
@@ -2256,8 +2262,15 @@
           );
           this.audio.playLogin();
           this._refreshAccountUI();
-          this._setAccountMessage("Account created & saved!");
+          this._setAccountMessage("Account created & synced to cloud ✓");
         } catch (err) {
+          // LOCAL_ONLY / SYNC_FAILED still leave the user logged in on this device
+          if (err.code === "LOCAL_ONLY" || err.code === "SYNC_FAILED") {
+            this.audio.playLogin();
+            this._refreshAccountUI();
+            this._setAccountMessage(err.message, true);
+            return;
+          }
           this.audio.playError();
           this._setAccountMessage(err.message, true);
         }

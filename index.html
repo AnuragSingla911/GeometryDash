@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Robot Rush — a fast, colourful side-scrolling platformer" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <title>Robot Rush</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="game-wrapper">
+    <canvas id="game-canvas" aria-label="Robot Rush game canvas"></canvas>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen active">
+      <div class="screen-panel">
+        <h1 class="game-title">Robot Rush</h1>
+        <p class="tagline">Run · Jump · Survive</p>
+        <p class="high-score-display">High Score: <span id="menu-high-score">0</span></p>
+        <button id="btn-play" class="btn btn-primary" type="button">Play</button>
+        <button id="btn-instructions" class="btn btn-secondary" type="button">How to Play</button>
+        <button id="btn-sound-menu" class="btn btn-icon" type="button" aria-label="Toggle sound">🔊 Sound On</button>
+      </div>
+    </div>
+
+    <!-- Instructions Overlay -->
+    <div id="instructions-screen" class="screen">
+      <div class="screen-panel instructions-panel">
+        <h2>How to Play</h2>
+        <ul class="instructions-list">
+          <li>Your robot runs automatically — jump to avoid obstacles!</li>
+          <li><kbd>Space</kbd> <kbd>↑</kbd> Click / Tap — Jump</li>
+          <li>Jump again in the air — Double Jump</li>
+          <li>Collect coins for bonus points & combos</li>
+          <li>Grab power-ups: Shield, Magnet, Slow-Mo, Jetpack, Super Jump</li>
+          <li><kbd>P</kbd> — Pause · <kbd>R</kbd> — Restart</li>
+        </ul>
+        <button id="btn-close-instructions" class="btn btn-primary" type="button">Got it!</button>
+      </div>
+    </div>
+
+    <!-- HUD (shown during gameplay) -->
+    <div id="hud" class="hud hidden" aria-live="polite">
+      <div class="hud-left">
+        <div class="hud-stat"><span class="hud-label">Score</span><span id="hud-score">0</span></div>
+        <div class="hud-stat"><span class="hud-label">Coins</span><span id="hud-coins">0</span></div>
+        <div class="hud-stat"><span class="hud-label">Distance</span><span id="hud-distance">0m</span></div>
+      </div>
+      <div class="hud-center">
+        <div id="hud-env" class="hud-env">Desert Road</div>
+        <div id="hud-powerup" class="hud-powerup hidden"></div>
+        <div id="hud-milestone" class="hud-milestone hidden"></div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-stat"><span class="hud-label">Speed</span><span id="hud-speed">1.0x</span></div>
+        <button id="btn-pause" class="btn btn-hud" type="button" aria-label="Pause">⏸</button>
+        <button id="btn-sound-hud" class="btn btn-hud" type="button" aria-label="Toggle sound">🔊</button>
+      </div>
+    </div>
+
+    <!-- Pause Screen -->
+    <div id="pause-screen" class="screen">
+      <div class="screen-panel">
+        <h2>Paused</h2>
+        <button id="btn-resume" class="btn btn-primary" type="button">Resume</button>
+        <button id="btn-menu-from-pause" class="btn btn-secondary" type="button">Main Menu</button>
+      </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="screen">
+      <div class="screen-panel">
+        <h2 class="gameover-title">Crash!</h2>
+        <div class="stats-grid">
+          <div class="stat-box"><span class="stat-label">Score</span><span id="go-score" class="stat-value">0</span></div>
+          <div class="stat-box"><span class="stat-label">High Score</span><span id="go-high-score" class="stat-value">0</span></div>
+          <div class="stat-box"><span class="stat-label">Coins</span><span id="go-coins" class="stat-value">0</span></div>
+          <div class="stat-box"><span class="stat-label">Distance</span><span id="go-distance" class="stat-value">0m</span></div>
+        </div>
+        <p id="new-record" class="new-record hidden">🎉 New High Score!</p>
+        <button id="btn-restart" class="btn btn-primary" type="button">Restart</button>
+        <button id="btn-menu" class="btn btn-secondary" type="button">Main Menu</button>
+      </div>
+    </div>
+
+    <!-- Warning indicator for incoming fast obstacles -->
+    <div id="warning-indicator" class="warning-indicator hidden" aria-hidden="true">⚠</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

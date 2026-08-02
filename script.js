@@ -18,8 +18,8 @@
   const GRAVITY = 2200;
   const JUMP_VELOCITY = -720;
   const DOUBLE_JUMP_VELOCITY = -640;
-  const BASE_SPEED = 280;
-  const MAX_SPEED = 620;
+  const BASE_SPEED = 220;
+  const MAX_SPEED = 580;
   const ROBOT_X = 140;
   const STORAGE_KEY = "robotRushHighScore";
   const COIN_VALUE = 25;
@@ -1201,13 +1201,13 @@
       this.obstacles = [];
       this.spawnTimer = 0;
       this.lastSpawnX = LOGICAL_W;
-      this.minGap = 280;
+      this.minGap = 300;
       this.warnings = [];
     }
 
     reset() {
       this.obstacles = [];
-      this.spawnTimer = 1.5;
+      this.spawnTimer = 2.2;
       this.lastSpawnX = LOGICAL_W;
       this.warnings = [];
     }
@@ -1310,7 +1310,7 @@
       this.obstacles = this.obstacles.filter((o) => o.alive);
 
       // Spawn cadence tightens with difficulty
-      const baseInterval = lerp(1.4, 0.55, difficulty);
+      const baseInterval = lerp(1.8, 0.6, difficulty);
       this.spawnTimer -= dt;
 
       if (this.spawnTimer <= 0) {
@@ -2244,8 +2244,8 @@
         this.robot.jump(this.audio);
       }
 
-      // Difficulty speed ramp
-      const difficulty = clamp(this.distance / 10000, 0, 1);
+      // Difficulty speed ramp — stays gentle early, ramps later
+      const difficulty = clamp(Math.pow(this.distance / 12000, 1.15), 0, 1);
       this.speed = lerp(BASE_SPEED, MAX_SPEED, difficulty);
       const effectiveSpeed = this.slowMo ? this.speed * 0.45 : this.speed;
 

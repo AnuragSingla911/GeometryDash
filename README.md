@@ -41,7 +41,7 @@ Without cloud sync, accounts live only in that browser’s `localStorage`.
 
 1. Create a [fine-grained PAT](https://github.com/settings/personal-access-tokens) with **Contents: Read and write** on `AnuragSingla911/GeometryDash` only.  
 2. Repo → **Settings → Secrets and variables → Actions → New repository secret**  
-   - Name: `DB_SYNC_TOKEN`  
+   - Name: `ABC`  
    - Value: your PAT  
 3. Push to `main` (or re-run **Deploy to GitHub Pages**). The token is injected into the live `data/config.json`.
 

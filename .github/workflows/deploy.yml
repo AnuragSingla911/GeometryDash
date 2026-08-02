@@ -28,21 +28,20 @@ jobs:
           cp index.html style.css script.js account-db.js favicon.svg README.md .nojekyll site/
           cp data/db.json site/data/
 
-          # Inject optional DB_SYNC_TOKEN so create/login works across browsers.
-          # Add a fine-grained PAT (Contents: Read/Write on this repo) as repo secret DB_SYNC_TOKEN.
+          # Inject PAT from repo secret ABC so create/login works across browsers.
           node <<'NODE'
           const fs = require('fs');
           const cfg = JSON.parse(fs.readFileSync('data/config.json', 'utf8'));
-          const token = process.env.DB_SYNC_TOKEN || '';
+          const token = process.env.ABC_TOKEN || '';
           cfg.githubToken = token;
           cfg.branch = cfg.branch || 'gh-pages';
           cfg.mirrorBranch = cfg.mirrorBranch || 'main';
           fs.writeFileSync('site/data/config.json', JSON.stringify(cfg, null, 2) + '\n');
-          console.log(token ? 'Cloud sync token injected into config.json' : 'No DB_SYNC_TOKEN secret — accounts stay device-local until configured');
+          console.log(token ? 'Cloud sync token injected from secret ABC' : 'Secret ABC is empty/missing — accounts stay device-local');
           NODE
           rm -f site/CNAME
         env:
-          DB_SYNC_TOKEN: ${{ secrets.DB_SYNC_TOKEN }}
+          ABC_TOKEN: ${{ secrets.ABC }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

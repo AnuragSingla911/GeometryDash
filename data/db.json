@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-02T12:15:00.000Z",
+  "accounts": {
+    "ossum": {
+      "username": "ossum",
+      "salt": "a1b2c3d4e5f60718",
+      "passHash": "255ee4868dd4820f6a88d62c4ec8936b4ae9b8da711c21ad1962d163db4fbcad",
+      "createdAt": "2026-08-02T12:15:00.000Z",
+      "updatedAt": "2026-08-02T12:15:00.000Z",
+      "progress": {
+        "easy": { "highScore": 0, "bestDistance": 0, "bestCoins": 0 },
+        "medium": { "highScore": 0, "bestDistance": 0, "bestCoins": 0 },
+        "hard": { "highScore": 0, "bestDistance": 0, "bestCoins": 0 },
+        "totalCoins": 0,
+        "gamesPlayed": 0,
+        "furthestEnv": "desert",
+        "lastDifficulty": "easy"
+      }
+    }
+  },
+  "leaderboard": []
+}

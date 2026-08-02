@@ -1,0 +1,10 @@
+{
+  "repo": "AnuragSingla911/GeometryDash",
+  "dbPath": "data/db.json",
+  "branch": "gh-pages",
+  "mirrorBranch": "main",
+  "syncKey": {
+    "a": "HpGFFkdNON3EXGNJv3nuM8jn9sFHbSde1UWuFIpIuz5wMi",
+    "b": "rZ4fljqiIDYGv_qA86OTOVcMXI0YRYQ5CA11_tap_buhtig"
+  }
+}

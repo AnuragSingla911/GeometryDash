@@ -645,6 +645,12 @@ body {
   color: var(--accent-gold);
 }
 
+.sync-details {
+  margin-bottom: 0.85rem;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
 .sync-details summary {
   cursor: pointer;
   color: var(--accent);

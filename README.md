@@ -6,6 +6,41 @@ A fast, colourful 2D side-scrolling platformer inspired by the feel of Geometry 
 
 Your futuristic robot runs automatically. Jump, double-jump, collect coins, grab power-ups, and survive desert roads, neon cities, and dangerous factories as the pace ramps up.
 
+## Difficulty
+
+Choose **Easy**, **Medium**, or **Hard** on the start screen. Difficulty mainly changes the robot’s running speed (and spawn pacing):
+
+| Level | Base speed | Feel |
+|-------|------------|------|
+| Easy | Slow | Learning / kids |
+| Medium | Classic | Balanced |
+| Hard | Fast | Expert |
+
+Scores are tracked separately per difficulty when you are logged in.
+
+## Accounts & database (no server)
+
+Robot Rush uses a **JSON database** that works on GitHub Pages with no backend:
+
+1. **localStorage** — instant create / login and progress on this device  
+2. **`data/db.json`** — shared database file deployed with the site (readable by everyone)  
+3. **Optional GitHub sync** — paste a fine-grained PAT (Contents write on this repo) under Account → Cloud sync to publish `data/db.json` back to GitHub so you can manage accounts and the leaderboard in the repo
+
+Saved per account:
+
+- High score / best distance / coins for Easy, Medium, and Hard  
+- Total coins, games played, furthest environment, last difficulty  
+
+Passwords are salted SHA-256 hashes (never stored in plain text).
+
+### Enable cloud sync (optional)
+
+1. Create a [fine-grained PAT](https://github.com/settings/personal-access-tokens) with **Contents: Read and write** on `AnuragSingla911/GeometryDash` only.  
+2. In the game: **Account → Cloud sync** → paste the token → **Save Token & Sync**.  
+3. The token stays in your browser `localStorage` (not committed). You can also put it in `data/config.json` as `githubToken` for your own private fork (do not commit secrets to a public repo).
+
+You can also **Export Save JSON** from the Account screen and commit it as `data/db.json` manually.
+
 ## How to run
 
 ### Online (GitHub Pages)

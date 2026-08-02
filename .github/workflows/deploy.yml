@@ -24,9 +24,9 @@ jobs:
 
       - name: Prepare publish directory
         run: |
-          mkdir -p site
-          cp index.html style.css script.js favicon.svg README.md site/
-          touch site/.nojekyll
+          mkdir -p site/data
+          cp index.html style.css script.js account-db.js favicon.svg README.md .nojekyll site/
+          cp data/db.json data/config.json site/data/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

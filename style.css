@@ -459,6 +459,234 @@ body {
   }
 }
 
+/* ---------- Difficulty & Account UI ---------- */
+
+.start-panel {
+  max-width: 440px;
+}
+
+.account-status {
+  display: inline-block;
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.difficulty-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+}
+
+.diff-btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.4rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.diff-btn:hover {
+  transform: translateY(-1px);
+  color: var(--text);
+}
+
+.diff-btn.active[data-diff="easy"] {
+  background: rgba(6, 214, 160, 0.25);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.diff-btn.active[data-diff="medium"] {
+  background: rgba(255, 209, 102, 0.22);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.diff-btn.active[data-diff="hard"] {
+  background: rgba(255, 107, 53, 0.22);
+  border-color: var(--accent-hot);
+  color: var(--accent-hot);
+}
+
+.diff-hint {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  margin-bottom: 0.9rem;
+  min-height: 1.2em;
+}
+
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  margin-bottom: 0.65rem;
+}
+
+.btn-row .btn {
+  margin-bottom: 0;
+}
+
+.hud-diff {
+  background: rgba(15, 28, 48, 0.72);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.account-panel {
+  max-width: 460px;
+  text-align: left;
+}
+
+.account-panel h2,
+.account-panel .btn-primary:last-of-type {
+  text-align: center;
+}
+
+.account-note {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 0.9rem;
+  line-height: 1.4;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+
+.auth-tab {
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.auth-tab.active {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.45);
+  color: var(--accent);
+}
+
+.auth-form label,
+.sync-details label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 0.65rem;
+}
+
+.auth-form input,
+.sync-details input {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 28, 48, 0.8);
+  color: var(--text);
+}
+
+.form-message {
+  min-height: 1.3em;
+  font-size: 0.85rem;
+  color: var(--accent-gold);
+  margin: 0.4rem 0 0.8rem;
+  text-align: center;
+}
+
+.form-message.error {
+  color: var(--accent-hot);
+}
+
+.logged-as {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.account-progress {
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid rgba(0, 229, 255, 0.18);
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 0.85rem;
+  line-height: 1.5;
+}
+
+.sync-details {
+  margin-bottom: 0.85rem;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.sync-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.leaderboard-list {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  max-height: 50vh;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.leaderboard-list li {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  gap: 0.5rem;
+  padding: 0.55rem 0.35rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.leaderboard-list .lb-rank {
+  color: var(--accent-gold);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.leaderboard-list .lb-score {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.leaderboard-list .lb-meta {
+  grid-column: 2 / -1;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
 /* ---------- Utilities ---------- */
 
 .hidden {

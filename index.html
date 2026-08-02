@@ -18,13 +18,82 @@
 
     <!-- Start Screen -->
     <div id="start-screen" class="screen active">
-      <div class="screen-panel">
+      <div class="screen-panel start-panel">
         <h1 class="game-title">Robot Rush</h1>
         <p class="tagline">Run · Jump · Survive</p>
+
+        <div id="account-status" class="account-status">Playing as Guest</div>
+
+        <div class="difficulty-picker" role="group" aria-label="Difficulty">
+          <button type="button" class="diff-btn active" data-diff="easy">Easy</button>
+          <button type="button" class="diff-btn" data-diff="medium">Medium</button>
+          <button type="button" class="diff-btn" data-diff="hard">Hard</button>
+        </div>
+        <p id="diff-hint" class="diff-hint">Slower robot — great for learning</p>
+
         <p class="high-score-display">High Score: <span id="menu-high-score">0</span></p>
+
         <button id="btn-play" class="btn btn-primary" type="button">Play</button>
+        <div class="btn-row">
+          <button id="btn-account" class="btn btn-secondary" type="button">Account</button>
+          <button id="btn-leaderboard" class="btn btn-secondary" type="button">Scores</button>
+        </div>
         <button id="btn-instructions" class="btn btn-secondary" type="button">How to Play</button>
         <button id="btn-sound-menu" class="btn btn-icon" type="button" aria-label="Toggle sound">🔊 Sound On</button>
+      </div>
+    </div>
+
+    <!-- Account Screen -->
+    <div id="account-screen" class="screen">
+      <div class="screen-panel account-panel">
+        <h2>Player Account</h2>
+        <p class="account-note">Saves scores &amp; progress in a JSON database on GitHub Pages (no server).</p>
+
+        <div id="account-logged-out">
+          <div class="auth-tabs">
+            <button type="button" class="auth-tab active" data-tab="login">Login</button>
+            <button type="button" class="auth-tab" data-tab="create">Create</button>
+          </div>
+
+          <form id="form-login" class="auth-form">
+            <label>Username<input id="login-user" type="text" autocomplete="username" maxlength="16" required /></label>
+            <label>Password<input id="login-pass" type="password" autocomplete="current-password" required /></label>
+            <button class="btn btn-primary" type="submit">Login</button>
+          </form>
+
+          <form id="form-create" class="auth-form hidden">
+            <label>Username<input id="create-user" type="text" autocomplete="username" maxlength="16" pattern="[A-Za-z0-9_]{3,16}" required /></label>
+            <label>Password<input id="create-pass" type="password" autocomplete="new-password" minlength="4" required /></label>
+            <button class="btn btn-primary" type="submit">Create Account</button>
+          </form>
+        </div>
+
+        <div id="account-logged-in" class="hidden">
+          <p class="logged-as">Logged in as <strong id="account-username"></strong></p>
+          <div id="account-progress" class="account-progress"></div>
+          <button id="btn-logout" class="btn btn-secondary" type="button">Logout</button>
+          <button id="btn-export-db" class="btn btn-icon" type="button">Export Save JSON</button>
+        </div>
+
+        <p id="account-message" class="form-message" role="status"></p>
+
+        <details class="sync-details">
+          <summary>Cloud sync (GitHub)</summary>
+          <p class="account-note">Optional: paste a fine-grained PAT with Contents write on this repo to publish <code>data/db.json</code>.</p>
+          <label>GitHub token<input id="github-token" type="password" autocomplete="off" placeholder="github_pat_…" /></label>
+          <button id="btn-save-token" class="btn btn-secondary" type="button">Save Token &amp; Sync</button>
+        </details>
+
+        <button id="btn-close-account" class="btn btn-primary" type="button">Back</button>
+      </div>
+    </div>
+
+    <!-- Leaderboard Screen -->
+    <div id="leaderboard-screen" class="screen">
+      <div class="screen-panel">
+        <h2>Top Scores</h2>
+        <ol id="leaderboard-list" class="leaderboard-list"></ol>
+        <button id="btn-close-leaderboard" class="btn btn-primary" type="button">Back</button>
       </div>
     </div>
 
@@ -36,7 +105,9 @@
           <li>Your robot runs automatically — jump to avoid obstacles!</li>
           <li><kbd>Space</kbd> <kbd>↑</kbd> Click / Tap — Jump</li>
           <li>Jump again in the air — Double Jump</li>
-          <li>Collect coins for bonus points & combos</li>
+          <li>Pick Easy / Medium / Hard — changes robot speed</li>
+          <li>Create an account to save scores &amp; progress</li>
+          <li>Collect coins for bonus points &amp; combos</li>
           <li>Grab power-ups: Shield, Magnet, Slow-Mo, Jetpack, Super Jump</li>
           <li><kbd>P</kbd> — Pause · <kbd>R</kbd> — Restart</li>
         </ul>
@@ -53,6 +124,7 @@
       </div>
       <div class="hud-center">
         <div id="hud-env" class="hud-env">Desert Road</div>
+        <div id="hud-diff" class="hud-diff">Easy</div>
         <div id="hud-powerup" class="hud-powerup hidden"></div>
         <div id="hud-milestone" class="hud-milestone hidden"></div>
       </div>
@@ -82,6 +154,7 @@
           <div class="stat-box"><span class="stat-label">Coins</span><span id="go-coins" class="stat-value">0</span></div>
           <div class="stat-box"><span class="stat-label">Distance</span><span id="go-distance" class="stat-value">0m</span></div>
         </div>
+        <p id="go-account-note" class="account-note"></p>
         <p id="new-record" class="new-record hidden">🎉 New High Score!</p>
         <button id="btn-restart" class="btn btn-primary" type="button">Restart</button>
         <button id="btn-menu" class="btn btn-secondary" type="button">Main Menu</button>
@@ -92,6 +165,7 @@
     <div id="warning-indicator" class="warning-indicator hidden" aria-hidden="true">⚠</div>
   </div>
 
+  <script src="account-db.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -18,12 +18,44 @@
   const GRAVITY = 2200;
   const JUMP_VELOCITY = -720;
   const DOUBLE_JUMP_VELOCITY = -640;
-  const BASE_SPEED = 220;
-  const MAX_SPEED = 580;
   const ROBOT_X = 140;
   const STORAGE_KEY = "robotRushHighScore";
   const COIN_VALUE = 25;
   const COMBO_BONUS = 10;
+
+  /** Difficulty presets — primarily robot running speed */
+  const DIFFICULTIES = {
+    easy: {
+      id: "easy",
+      label: "Easy",
+      hint: "Slower robot — great for learning",
+      baseSpeed: 150,
+      maxSpeed: 320,
+      spawnMul: 1.35,
+      gapMul: 1.25,
+      scoreMul: 0.85,
+    },
+    medium: {
+      id: "medium",
+      label: "Medium",
+      hint: "Classic pace — balanced challenge",
+      baseSpeed: 220,
+      maxSpeed: 520,
+      spawnMul: 1,
+      gapMul: 1,
+      scoreMul: 1,
+    },
+    hard: {
+      id: "hard",
+      label: "Hard",
+      hint: "Fast robot — for rush pros",
+      baseSpeed: 310,
+      maxSpeed: 720,
+      spawnMul: 0.7,
+      gapMul: 0.85,
+      scoreMul: 1.25,
+    },
+  };
 
   const ENVIRONMENTS = [
     { id: "desert", name: "Desert Road", unlockAt: 0 },
@@ -98,7 +130,7 @@
     }
 
     /** Play a short synthesised tone */
-    _tone(freq, dur, type = "square", vol = 0.08, slideTo = null) {
+    _tone(freq, dur, type = "square", vol = 0.14, slideTo = null) {
       if (!this.enabled) return;
       const ctx = this.ensureCtx();
       if (!ctx) return;
@@ -119,8 +151,15 @@
       } catch (_) { /* audio may fail silently */ }
     }
 
+    /** Layered chord / multi-tone helper */
+    _chord(freqs, dur, type = "sine", vol = 0.08) {
+      freqs.forEach((f, i) => {
+        setTimeout(() => this._tone(f, dur, type, vol), i * 18);
+      });
+    }
+
     /** Soft noise burst for collisions / dust */
-    _noise(dur = 0.15, vol = 0.06) {
+    _noise(dur = 0.15, vol = 0.12) {
       if (!this.enabled) return;
       const ctx = this.ensureCtx();
       if (!ctx) return;
@@ -145,36 +184,55 @@
     }
 
     playJump() {
-      this._tone(420, 0.1, "square", 0.07, 680);
+      this._tone(440, 0.09, "square", 0.12, 720);
+      this._tone(660, 0.07, "triangle", 0.07, 880);
     }
 
     playDoubleJump() {
-      this._tone(520, 0.08, "square", 0.07, 900);
-      setTimeout(() => this._tone(700, 0.08, "triangle", 0.05, 1100), 40);
+      this._tone(560, 0.08, "square", 0.13, 980);
+      setTimeout(() => this._tone(760, 0.09, "triangle", 0.1, 1200), 35);
+      setTimeout(() => this._tone(980, 0.08, "sine", 0.08, 1400), 70);
     }
 
     playCoin() {
-      this._tone(880, 0.07, "sine", 0.06, 1400);
+      this._tone(988, 0.06, "sine", 0.11, 1480);
+      setTimeout(() => this._tone(1318, 0.1, "sine", 0.1), 45);
+      setTimeout(() => this._tone(1568, 0.08, "triangle", 0.07), 90);
     }
 
     playPowerUp() {
-      this._tone(300, 0.12, "sawtooth", 0.05, 600);
-      setTimeout(() => this._tone(600, 0.15, "sine", 0.06, 1200), 80);
+      this._chord([330, 415, 554, 740], 0.12, "sawtooth", 0.09);
+      setTimeout(() => this._chord([554, 740, 880], 0.16, "sine", 0.1), 100);
     }
 
     playCollision() {
-      this._noise(0.3, 0.12);
-      this._tone(120, 0.25, "sawtooth", 0.1, 40);
+      this._noise(0.35, 0.2);
+      this._tone(140, 0.28, "sawtooth", 0.16, 45);
+      setTimeout(() => this._tone(90, 0.2, "square", 0.1, 40), 50);
+      setTimeout(() => this._noise(0.2, 0.1), 80);
     }
 
     playMilestone() {
-      this._tone(523, 0.1, "sine", 0.07);
-      setTimeout(() => this._tone(659, 0.1, "sine", 0.07), 100);
-      setTimeout(() => this._tone(784, 0.18, "sine", 0.08), 200);
+      this._chord([523, 659, 784, 1046], 0.14, "sine", 0.11);
+      setTimeout(() => this._tone(1174, 0.22, "triangle", 0.12), 160);
     }
 
     playClick() {
-      this._tone(600, 0.04, "square", 0.04);
+      this._tone(720, 0.04, "square", 0.08);
+      this._tone(480, 0.05, "triangle", 0.05);
+    }
+
+    playWhoosh() {
+      this._noise(0.12, 0.08);
+      this._tone(200, 0.1, "sine", 0.06, 80);
+    }
+
+    playLogin() {
+      this._chord([392, 523, 659], 0.12, "sine", 0.1);
+    }
+
+    playError() {
+      this._tone(220, 0.12, "sawtooth", 0.1, 140);
     }
 
     startMusic() {
@@ -183,12 +241,13 @@
       const ctx = this.ensureCtx();
       if (!ctx || this.musicNodes) return;
       try {
-        // Simple looping arpeggio pad
+        // Energetic looping arpeggio + bass pulse
         const master = ctx.createGain();
-        master.gain.value = 0.035;
+        master.gain.value = 0.055;
         master.connect(ctx.destination);
 
-        const notes = [262, 330, 392, 523, 392, 330];
+        const notes = [262, 330, 392, 523, 392, 330, 294, 349];
+        const bass = [131, 131, 147, 165];
         let step = 0;
         const playStep = () => {
           if (!this.musicNodes) return;
@@ -198,15 +257,29 @@
           osc.frequency.value = notes[step % notes.length];
           g.gain.setValueAtTime(0.001, ctx.currentTime);
           g.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.02);
-          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.26);
           osc.connect(g);
           g.connect(master);
           osc.start();
-          osc.stop(ctx.currentTime + 0.3);
+          osc.stop(ctx.currentTime + 0.28);
+
+          if (step % 2 === 0) {
+            const b = ctx.createOscillator();
+            const bg = ctx.createGain();
+            b.type = "sine";
+            b.frequency.value = bass[(step / 2) % bass.length];
+            bg.gain.setValueAtTime(0.001, ctx.currentTime);
+            bg.gain.linearRampToValueAtTime(0.7, ctx.currentTime + 0.03);
+            bg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+            b.connect(bg);
+            bg.connect(master);
+            b.start();
+            b.stop(ctx.currentTime + 0.38);
+          }
           step++;
         };
 
-        const interval = setInterval(playStep, 320);
+        const interval = setInterval(playStep, 280);
         playStep();
         this.musicNodes = { master, interval };
       } catch (_) {
@@ -492,7 +565,7 @@
       }
 
       // Speed trail
-      if (speed > BASE_SPEED * 1.2) {
+      if (speed > 260) {
         this.trail.push({
           x: this.x + this.w / 2,
           y: this.y + this.h / 2,
@@ -1220,10 +1293,11 @@
       // Time to double-jump peak ≈ 0.55s at base; scale with speed
       const jumpDist = speed * 0.55;
       const doubleJumpDist = speed * 0.9;
-      let need = jumpDist + 80;
-      if (pattern.tall || pattern.combo) need = doubleJumpDist + 100;
-      if (pattern.flying && pattern.ground) need = doubleJumpDist + 140;
-      return Math.max(this.minGap, need);
+      const gapMul = this.gapMul || 1;
+      let need = (jumpDist + 80) * gapMul;
+      if (pattern.tall || pattern.combo) need = (doubleJumpDist + 100) * gapMul;
+      if (pattern.flying && pattern.ground) need = (doubleJumpDist + 140) * gapMul;
+      return Math.max(this.minGap * gapMul, need);
     }
 
     _pickPattern(env, difficulty) {
@@ -1310,7 +1384,7 @@
       this.obstacles = this.obstacles.filter((o) => o.alive);
 
       // Spawn cadence tightens with difficulty
-      const baseInterval = lerp(1.8, 0.6, difficulty);
+      const baseInterval = lerp(1.8, 0.6, difficulty) * (this.spawnMul || 1);
       this.spawnTimer -= dt;
 
       if (this.spawnTimer <= 0) {
@@ -1554,7 +1628,7 @@
       this.time += dt;
       this.scroll += speed * dt;
       for (const c of this.clouds) {
-        c.x -= c.speed * dt * (speed / BASE_SPEED);
+        c.x -= c.speed * dt * (speed / 220);
         if (c.x + c.w < 0) {
           c.x = LOGICAL_W + rand(20, 100);
           c.y = rand(30, 160);
@@ -1856,6 +1930,8 @@
       this.els = {
         start: document.getElementById("start-screen"),
         instructions: document.getElementById("instructions-screen"),
+        account: document.getElementById("account-screen"),
+        leaderboard: document.getElementById("leaderboard-screen"),
         pause: document.getElementById("pause-screen"),
         gameover: document.getElementById("gameover-screen"),
         hud: document.getElementById("hud"),
@@ -1864,31 +1940,35 @@
         distance: document.getElementById("hud-distance"),
         speed: document.getElementById("hud-speed"),
         env: document.getElementById("hud-env"),
+        diff: document.getElementById("hud-diff"),
         powerup: document.getElementById("hud-powerup"),
         milestone: document.getElementById("hud-milestone"),
         menuHigh: document.getElementById("menu-high-score"),
+        accountStatus: document.getElementById("account-status"),
         goScore: document.getElementById("go-score"),
         goHigh: document.getElementById("go-high-score"),
         goCoins: document.getElementById("go-coins"),
         goDistance: document.getElementById("go-distance"),
+        goAccountNote: document.getElementById("go-account-note"),
         newRecord: document.getElementById("new-record"),
         warning: document.getElementById("warning-indicator"),
         soundMenu: document.getElementById("btn-sound-menu"),
         soundHud: document.getElementById("btn-sound-hud"),
+        diffHint: document.getElementById("diff-hint"),
+        leaderboardList: document.getElementById("leaderboard-list"),
       };
       this._updateSoundButtons();
     }
 
     show(screen) {
-      ["start", "instructions", "pause", "gameover"].forEach((k) => {
-        this.els[k].classList.toggle("active", k === screen);
+      const screens = ["start", "instructions", "account", "leaderboard", "pause", "gameover"];
+      screens.forEach((k) => {
+        if (this.els[k]) this.els[k].classList.toggle("active", k === screen);
       });
-      this.els.hud.classList.toggle("hidden", screen !== null && screen !== "playing");
+      this.els.hud.classList.toggle("hidden", screen !== "playing");
       if (screen === "playing") {
         this.els.hud.classList.remove("hidden");
-        ["start", "instructions", "pause", "gameover"].forEach((k) =>
-          this.els[k].classList.remove("active")
-        );
+        screens.forEach((k) => this.els[k] && this.els[k].classList.remove("active"));
       }
     }
 
@@ -1898,6 +1978,7 @@
       this.els.distance.textContent = Math.floor(data.distance) + "m";
       this.els.speed.textContent = data.speedMul.toFixed(1) + "x";
       this.els.env.textContent = data.envName;
+      if (this.els.diff) this.els.diff.textContent = data.diffLabel || "";
 
       if (data.powerupLabel) {
         this.els.powerup.textContent = data.powerupLabel;
@@ -1924,11 +2005,39 @@
       this.els.goCoins.textContent = stats.coins;
       this.els.goDistance.textContent = Math.floor(stats.distance) + "m";
       this.els.newRecord.classList.toggle("hidden", !stats.isNewRecord);
+      if (this.els.goAccountNote) {
+        this.els.goAccountNote.textContent = stats.accountNote || "";
+      }
       this.show("gameover");
     }
 
     setMenuHighScore(n) {
       this.els.menuHigh.textContent = n;
+    }
+
+    setAccountStatus(text) {
+      if (this.els.accountStatus) this.els.accountStatus.textContent = text;
+    }
+
+    setDiffHint(text) {
+      if (this.els.diffHint) this.els.diffHint.textContent = text;
+    }
+
+    renderLeaderboard(rows) {
+      const list = this.els.leaderboardList;
+      if (!list) return;
+      if (!rows.length) {
+        list.innerHTML = "<li>No scores yet — be the first!</li>";
+        return;
+      }
+      list.innerHTML = rows
+        .map(
+          (r, i) =>
+            `<li><span class="lb-rank">${i + 1}</span><span>${r.username}</span>` +
+            `<span class="lb-score">${r.score}</span>` +
+            `<span class="lb-meta">${(r.difficulty || "medium").toUpperCase()} · ${r.distance || 0}m</span></li>`
+        )
+        .join("");
     }
 
     _updateSoundButtons() {
@@ -1948,12 +2057,13 @@
   // Game — main controller
   // ============================================================
   class Game {
-    constructor() {
+    constructor(accountDb) {
       this.canvas = document.getElementById("game-canvas");
       this.ctx = this.canvas.getContext("2d");
       this.audio = new AudioManager();
       this.input = new InputManager(this.canvas);
       this.ui = new UIManager(this.audio);
+      this.accounts = accountDb;
       this.robot = new Robot();
       this.obstacles = new ObstacleManager();
       this.background = new Background();
@@ -1962,12 +2072,14 @@
       this.powerups = [];
 
       this.state = "menu"; // menu | playing | paused | gameover
+      this.difficultyId = "easy";
+      this.diff = DIFFICULTIES.easy;
       this.score = 0;
       this.coinsCollected = 0;
       this.distance = 0;
       this.coinCombo = 0;
       this.comboTimer = 0;
-      this.speed = BASE_SPEED;
+      this.speed = this.diff.baseSpeed;
       this.slowMo = false;
       this.slowMoTimer = 0;
       this.activePower = null;
@@ -1982,9 +2094,7 @@
       this.lastTime = 0;
       this.raf = null;
 
-      this.highScore = this._loadHighScore();
-      this.ui.setMenuHighScore(this.highScore);
-
+      this._refreshAccountUI();
       this._bindUI();
       this._resize();
       window.addEventListener("resize", () => this._resize());
@@ -1995,18 +2105,50 @@
       this._loop(this.lastTime);
     }
 
-    _loadHighScore() {
-      try {
-        return parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10) || 0;
-      } catch (_) {
-        return 0;
-      }
+    _diffHighScore() {
+      return this.accounts.getHighScore(this.difficultyId);
     }
 
-    _saveHighScore(n) {
-      try {
-        localStorage.setItem(STORAGE_KEY, String(n));
-      } catch (_) { /* ignore */ }
+    _refreshAccountUI() {
+      if (this.accounts.isLoggedIn()) {
+        const acc = this.accounts.getAccount();
+        this.ui.setAccountStatus(`👤 ${acc.username}`);
+        document.getElementById("account-logged-out").classList.add("hidden");
+        document.getElementById("account-logged-in").classList.remove("hidden");
+        document.getElementById("account-username").textContent = acc.username;
+        const p = acc.progress || {};
+        document.getElementById("account-progress").innerHTML =
+          `<div>Games: <strong>${p.gamesPlayed || 0}</strong> · Coins: <strong>${p.totalCoins || 0}</strong></div>` +
+          `<div>Easy best: <strong>${(p.easy && p.easy.highScore) || 0}</strong></div>` +
+          `<div>Medium best: <strong>${(p.medium && p.medium.highScore) || 0}</strong></div>` +
+          `<div>Hard best: <strong>${(p.hard && p.hard.highScore) || 0}</strong></div>` +
+          `<div>Furthest: <strong>${p.furthestEnv || "desert"}</strong></div>`;
+      } else {
+        this.ui.setAccountStatus("Playing as Guest");
+        document.getElementById("account-logged-out").classList.remove("hidden");
+        document.getElementById("account-logged-in").classList.add("hidden");
+      }
+      this.ui.setMenuHighScore(this._diffHighScore());
+      this.ui.setDiffHint(this.diff.hint);
+    }
+
+    _setDifficulty(id) {
+      if (!DIFFICULTIES[id]) return;
+      this.difficultyId = id;
+      this.diff = DIFFICULTIES[id];
+      document.querySelectorAll(".diff-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.diff === id);
+      });
+      this.ui.setDiffHint(this.diff.hint);
+      this.ui.setMenuHighScore(this._diffHighScore());
+      this.audio.playClick();
+    }
+
+    _setAccountMessage(text, isError) {
+      const el = document.getElementById("account-message");
+      if (!el) return;
+      el.textContent = text || "";
+      el.classList.toggle("error", !!isError);
     }
 
     _bindUI() {
@@ -2022,6 +2164,20 @@
       click("btn-play", () => this.start());
       click("btn-instructions", () => this.ui.show("instructions"));
       click("btn-close-instructions", () => this.ui.show("start"));
+      click("btn-account", () => {
+        this._refreshAccountUI();
+        this._setAccountMessage("");
+        this.ui.show("account");
+      });
+      click("btn-close-account", () => {
+        this._refreshAccountUI();
+        this.ui.show("start");
+      });
+      click("btn-leaderboard", () => {
+        this.ui.renderLeaderboard(this.accounts.getLeaderboard(15));
+        this.ui.show("leaderboard");
+      });
+      click("btn-close-leaderboard", () => this.ui.show("start"));
       click("btn-restart", () => this.start());
       click("btn-menu", () => this.toMenu());
       click("btn-menu-from-pause", () => this.toMenu());
@@ -2029,6 +2185,83 @@
       click("btn-pause", () => this.pause());
       click("btn-sound-menu", () => this.ui.toggleSound());
       click("btn-sound-hud", () => this.ui.toggleSound());
+      click("btn-logout", () => {
+        this.accounts.logout();
+        this._refreshAccountUI();
+        this._setAccountMessage("Logged out");
+      });
+      click("btn-export-db", () => {
+        const blob = new Blob([this.accounts.exportJson()], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "robot-rush-db.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+      click("btn-save-token", async () => {
+        const token = document.getElementById("github-token").value.trim();
+        this.accounts.setGithubToken(token);
+        const res = await this.accounts.syncToGithub();
+        if (res.skipped) this._setAccountMessage("Token saved locally. Sync skipped (empty?).", true);
+        else if (res.ok) this._setAccountMessage("Synced data/db.json to GitHub ✓");
+        else this._setAccountMessage(res.error || "Sync failed", true);
+      });
+
+      document.querySelectorAll(".diff-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this._setDifficulty(btn.dataset.diff);
+        });
+      });
+
+      document.querySelectorAll(".auth-tab").forEach((tab) => {
+        tab.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.audio.playClick();
+          document.querySelectorAll(".auth-tab").forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          const isLogin = tab.dataset.tab === "login";
+          document.getElementById("form-login").classList.toggle("hidden", !isLogin);
+          document.getElementById("form-create").classList.toggle("hidden", isLogin);
+        });
+      });
+
+      document.getElementById("form-login").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          await this.accounts.login(
+            document.getElementById("login-user").value,
+            document.getElementById("login-pass").value
+          );
+          this.audio.playLogin();
+          this._refreshAccountUI();
+          this._setAccountMessage("Welcome back!");
+          if (this.accounts.getAccount().progress.lastDifficulty) {
+            this._setDifficulty(this.accounts.getAccount().progress.lastDifficulty);
+          }
+        } catch (err) {
+          this.audio.playError();
+          this._setAccountMessage(err.message, true);
+        }
+      });
+
+      document.getElementById("form-create").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          await this.accounts.createAccount(
+            document.getElementById("create-user").value,
+            document.getElementById("create-pass").value
+          );
+          this.audio.playLogin();
+          this._refreshAccountUI();
+          this._setAccountMessage("Account created & saved!");
+        } catch (err) {
+          this.audio.playError();
+          this._setAccountMessage(err.message, true);
+        }
+      });
     }
 
     _resize() {
@@ -2046,6 +2279,8 @@
     start() {
       this.robot.reset();
       this.obstacles.reset();
+      this.obstacles.spawnMul = this.diff.spawnMul;
+      this.obstacles.gapMul = this.diff.gapMul;
       this.particles = [];
       this.coins = [];
       this.powerups = [];
@@ -2054,7 +2289,7 @@
       this.distance = 0;
       this.coinCombo = 0;
       this.comboTimer = 0;
-      this.speed = BASE_SPEED;
+      this.speed = this.diff.baseSpeed;
       this.slowMo = false;
       this.slowMoTimer = 0;
       this.activePower = null;
@@ -2070,12 +2305,13 @@
       this.ui.show("playing");
       this.audio.ensureCtx();
       this.audio.startMusic();
+      this.audio.playWhoosh();
     }
 
     toMenu() {
       this.state = "menu";
       this.audio.stopMusic();
-      this.ui.setMenuHighScore(this.highScore);
+      this._refreshAccountUI();
       this.ui.show("start");
     }
 
@@ -2091,7 +2327,7 @@
       this.ui.show("playing");
     }
 
-    gameOver() {
+    async gameOver() {
       this.state = "gameover";
       this.robot.crash();
       this.audio.playCollision();
@@ -2129,20 +2365,43 @@
       }
 
       const finalScore = Math.floor(this.score);
-      const isNew = finalScore > this.highScore;
-      if (isNew) {
-        this.highScore = finalScore;
-        this._saveHighScore(this.highScore);
+      const env = this._currentEnv();
+      let isNew = false;
+      let accountNote = "Login or create an account to save progress.";
+
+      // Guest legacy high score
+      try {
+        const legacy = parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10) || 0;
+        if (finalScore > legacy) localStorage.setItem(STORAGE_KEY, String(finalScore));
+      } catch (_) { /* ignore */ }
+
+      if (this.accounts.isLoggedIn()) {
+        const result = await this.accounts.recordRun({
+          score: finalScore,
+          distance: this.distance,
+          coins: this.coinsCollected,
+          difficulty: this.difficultyId,
+          envId: env.id,
+        });
+        isNew = !!(result && result.isRecord);
+        accountNote = isNew
+          ? `Saved to ${this.accounts.currentUser}'s account — new best on ${this.diff.label}!`
+          : `Progress saved to ${this.accounts.currentUser}'s account.`;
+      } else {
+        isNew = finalScore > this._diffHighScore();
       }
+
+      const highScore = this._diffHighScore();
 
       // Brief delay so crash anim plays
       setTimeout(() => {
         this.ui.showGameOver({
           score: finalScore,
-          highScore: this.highScore,
+          highScore: Math.max(highScore, finalScore),
           coins: this.coinsCollected,
           distance: this.distance,
           isNewRecord: isNew,
+          accountNote,
         });
       }, 700);
     }
@@ -2227,7 +2486,7 @@
       }
 
       if (this.state === "menu" || this.state === "paused") {
-        this.background.update(dt * 0.3, BASE_SPEED * 0.3);
+        this.background.update(dt * 0.3, this.diff.baseSpeed * 0.3);
         return;
       }
 
@@ -2245,12 +2504,12 @@
       }
 
       // Difficulty speed ramp — stays gentle early, ramps later
-      const difficulty = clamp(Math.pow(this.distance / 12000, 1.15), 0, 1);
-      this.speed = lerp(BASE_SPEED, MAX_SPEED, difficulty);
+      const ramp = clamp(Math.pow(this.distance / 12000, 1.15), 0, 1);
+      this.speed = lerp(this.diff.baseSpeed, this.diff.maxSpeed, ramp);
       const effectiveSpeed = this.slowMo ? this.speed * 0.45 : this.speed;
 
       this.distance += effectiveSpeed * dt * 0.1;
-      this.score += effectiveSpeed * dt * 0.15;
+      this.score += effectiveSpeed * dt * 0.15 * this.diff.scoreMul;
 
       // Environment switch
       const env = this._currentEnv();
@@ -2396,8 +2655,9 @@
         score: this.score,
         coins: this.coinsCollected,
         distance: this.distance,
-        speedMul: this.speed / BASE_SPEED,
+        speedMul: this.speed / this.diff.baseSpeed,
         envName: env.name,
+        diffLabel: this.diff.label,
         powerupLabel: powerLabel,
         showWarning: this.obstacles.warnings.length > 0,
       });
@@ -2466,7 +2726,9 @@
   }
 
   // Boot
-  window.addEventListener("DOMContentLoaded", () => {
-    window.game = new Game();
+  window.addEventListener("DOMContentLoaded", async () => {
+    const db = new window.RobotRushAccountDB();
+    await db.init();
+    window.game = new Game(db);
   });
 })();

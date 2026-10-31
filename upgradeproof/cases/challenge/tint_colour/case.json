@@ -1,0 +1,11 @@
+{
+  "id": "tint_colour",
+  "title": "tintlib renames the color parameter to colour",
+  "dependency": {"name": "tintlib", "from": "1.0.0", "to": "1.1.0"},
+  "expect": {"deterministic": "verified_repair", "cpu": "verified_repair"},
+  "package_dirs": {"from": "pkgs/1.0.0", "to": "pkgs/1.1.0"},
+  "sealed_tests": ["sealed"],
+  "allowed_prefixes": ["src/"],
+  "source": "newly-authored",
+  "authored": "2026-10-31"
+}

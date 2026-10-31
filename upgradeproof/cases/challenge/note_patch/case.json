@@ -1,0 +1,11 @@
+{
+  "id": "note_patch",
+  "title": "notelib 1.0.1 changes a docstring only",
+  "dependency": {"name": "notelib", "from": "1.0.0", "to": "1.0.1"},
+  "expect": {"deterministic": "verified_bump", "cpu": "verified_bump"},
+  "package_dirs": {"from": "pkgs/1.0.0", "to": "pkgs/1.0.1"},
+  "sealed_tests": ["sealed"],
+  "allowed_prefixes": ["src/"],
+  "source": "newly-authored",
+  "authored": "2026-10-31"
+}

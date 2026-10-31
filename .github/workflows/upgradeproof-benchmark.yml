@@ -1,0 +1,46 @@
+name: UpgradeProof benchmark
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "upgradeproof/**"
+      - ".github/workflows/upgradeproof-benchmark.yml"
+  push:
+    branches: [main]
+    paths:
+      - "upgradeproof/**"
+      - ".github/workflows/upgradeproof-benchmark.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pytest
+        run: python -m pip install pytest
+      - name: Unit tests
+        working-directory: upgradeproof
+        run: python -m pytest -q
+        env:
+          PYTHONPATH: src
+      - name: Feasibility benchmark
+        working-directory: upgradeproof
+        run: python -m upgradeproof benchmark --out artifacts
+        env:
+          PYTHONPATH: src
+      - uses: actions/upload-artifact@v4
+        with:
+          name: upgradeproof-evidence
+          path: |
+            upgradeproof/artifacts/**
+            upgradeproof/site/results.json
+          if-no-files-found: error
+          retention-days: 14

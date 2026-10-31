@@ -1,0 +1,11 @@
+{
+  "id": "echo_partial",
+  "title": "echolib renames a keyword but no sealed oracle is published",
+  "dependency": {"name": "echolib", "from": "1.0.0", "to": "1.1.0"},
+  "expect": {"deterministic": "unresolved", "cpu": "unresolved"},
+  "package_dirs": {"from": "pkgs/1.0.0", "to": "pkgs/1.1.0"},
+  "sealed_tests": [],
+  "allowed_prefixes": ["src/"],
+  "source": "newly-authored",
+  "authored": "2026-10-31"
+}

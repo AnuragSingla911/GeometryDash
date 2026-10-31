@@ -1,0 +1,17 @@
+{"failure": "FAILED tests/test_public.py::test_blank_is_invalid AttributeError module ages has no attribute LegacyError", "candidate": "InputError: blank or malformed values", "kind": "rename_except", "label": 1}
+{"failure": "FAILED tests/test_public.py::test_blank_is_invalid AttributeError module ages has no attribute LegacyError", "candidate": "StateError: operation while the registry is closed", "kind": "rename_except", "label": 0}
+{"failure": "FAILED tests/test_public.py::test_blank_is_invalid AttributeError module ages has no attribute LegacyError", "candidate": "catch Exception to suppress every error", "kind": "rename_except", "broad": true, "label": 0}
+{"failure": "FAILED tests/test_public.py::test_empty_value blank malformed age label", "candidate": "InputError: blank or malformed values", "kind": "rename_except", "label": 1}
+{"failure": "FAILED tests/test_public.py::test_empty_value blank malformed age label", "candidate": "StateError: operation while the registry is closed", "kind": "rename_except", "label": 0}
+{"failure": "FAILED tests/test_public.py::test_empty_value blank malformed age label", "candidate": "catch Exception to suppress every error", "kind": "rename_except", "broad": true, "label": 0}
+{"failure": "FAILED tests/test_public.py::test_closed_registry registry is closed", "candidate": "StateError: operation while the registry is closed", "kind": "rename_except", "label": 1}
+{"failure": "FAILED tests/test_public.py::test_closed_registry registry is closed", "candidate": "InputError: blank or malformed values", "kind": "rename_except", "label": 0}
+{"failure": "FAILED tests/test_public.py::test_closed_registry registry is closed", "candidate": "catch Exception to suppress every error", "kind": "rename_except", "broad": true, "label": 0}
+{"failure": "AttributeError registry is closed while reading state", "candidate": "StateError: operation while the registry is closed", "kind": "rename_except", "label": 1}
+{"failure": "AttributeError registry is closed while reading state", "candidate": "InputError: blank or malformed values", "kind": "rename_except", "label": 0}
+{"failure": "test_missing_field blank input rejected as invalid", "candidate": "InputError: blank or malformed values", "kind": "rename_except", "label": 1}
+{"failure": "test_missing_field blank input rejected as invalid", "candidate": "StateError: operation while the registry is closed", "kind": "rename_except", "label": 0}
+{"failure": "TypeError unexpected keyword argument color", "candidate": "rename keyword color to colour", "kind": "rename_keyword", "label": 1}
+{"failure": "TypeError unexpected keyword argument color", "candidate": "catch Exception to suppress every error", "kind": "rename_except", "broad": true, "label": 0}
+{"failure": "ImportError cannot import name say_hello", "candidate": "RENAME say_hello -> greet", "kind": "rename_symbol", "label": 1}
+{"failure": "ImportError cannot import name say_hello", "candidate": "catch Exception to suppress every error", "kind": "rename_except", "broad": true, "label": 0}

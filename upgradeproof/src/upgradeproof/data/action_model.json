@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "bias": -0.1738496905605146,
+  "threshold": 0.6,
+  "margin": 0.12,
+  "weights": {
+    "broad": -1.975327394442026,
+    "k:rename_except": -2.303929023302503,
+    "k:rename_keyword": 1.0732539594982,
+    "k:rename_symbol": 1.0732539594982,
+    "s:blank": 4.654223523071781,
+    "s:closed": 2.178621012819741,
+    "s:color": 1.0732539594982,
+    "s:error": -0.3998406764755856,
+    "s:hello": 1.0732539594982,
+    "s:input": 1.0786254382608276,
+    "s:is": 0.5886273478754233,
+    "s:keyword": 1.0732539594982,
+    "s:malformed": 1.0786254382608276,
+    "s:registry": 2.178621012819741,
+    "s:say": 1.0732539594982,
+    "s:state": 0.8042286568645199,
+    "s:while": 0.8042286568645199
+  },
+  "notes": "Trained from training/synthetic.jsonl. Challenge cases are not rows in that file."
+}

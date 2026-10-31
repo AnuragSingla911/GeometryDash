@@ -1,0 +1,47 @@
+{
+  "description": "Public breaking changes cited as relevance evidence. These entries are not executed, and their source is not redistributed.",
+  "contamination_note": "Historical fixes and migration guides may already appear in a language model's training data. This catalog is not a contamination-free benchmark. The challenge suite under cases/challenge is newly authored for that reason.",
+  "cases": [
+    {
+      "id": "django-40-url-removed",
+      "package": "Django",
+      "from_version": "3.2",
+      "to_version": "4.0",
+      "summary": "Django 4.0 removed django.conf.urls.url(). The documented replacement for a regular-expression route is django.urls.re_path().",
+      "references": [
+        "https://docs.djangoproject.com/en/4.0/releases/4.0/#features-removed-in-4-0"
+      ],
+      "license_note": "Django is BSD-3-Clause. This repository does not copy Django source.",
+      "executable": false,
+      "exclusion_reason": "A full Django project is outside this milestone's small-Python budget, and the original application environments are not reproduced here."
+    },
+    {
+      "id": "numpy-124-expired-builtin-aliases",
+      "package": "numpy",
+      "from_version": "1.23",
+      "to_version": "1.24.0",
+      "summary": "NumPy 1.24 expired the deprecation of builtin aliases including np.int, np.float, np.complex, np.bool, np.object, and np.str. The 1.20 notes say np.int is identical to int and can be replaced with int or np.int_.",
+      "references": [
+        "https://numpy.org/doc/1.24/release/1.24.0-notes.html",
+        "https://numpy.org/doc/stable/release/1.20.0-notes.html"
+      ],
+      "license_note": "NumPy is BSD-3-Clause. This repository does not copy NumPy source.",
+      "executable": false,
+      "exclusion_reason": "Not reproduced in this milestone. Listed so the benchmark is anchored to a documented public breakage."
+    },
+    {
+      "id": "pydantic-v2-parse-obj",
+      "package": "pydantic",
+      "from_version": "1",
+      "to_version": "2",
+      "summary": "Pydantic v2 maps BaseModel.parse_obj() to model_validate(). A public illustration is the LangChain change that removed parse_obj usage.",
+      "references": [
+        "https://github.com/pydantic/pydantic/blob/main/docs/migration.md",
+        "https://github.com/langchain-ai/langchain/pull/32204"
+      ],
+      "license_note": "See each upstream repository's license. This repository does not copy their source.",
+      "executable": false,
+      "exclusion_reason": "The cited change is mixed into a larger codebase. It is a reference, not a pinned reproducible case."
+    }
+  ]
+}

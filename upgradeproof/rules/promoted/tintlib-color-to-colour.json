@@ -1,0 +1,18 @@
+{
+  "id": "tintlib-color-to-colour",
+  "status": "promoted",
+  "package": "tintlib",
+  "to_version": "1.1.0",
+  "preconditions": [
+    {"op": "error_type", "value": "TypeError"},
+    {"op": "message_regex", "value": "unexpected keyword argument 'color'"},
+    {"op": "signature_has_param", "symbol": "Tint", "param": "colour"}
+  ],
+  "action": {
+    "kind": "rename_keyword",
+    "call_name": "Tint",
+    "old": "color",
+    "new": "colour"
+  },
+  "note": "Accepted for tintlib 1.1.0 only. A different package with the same keyword is not covered."
+}

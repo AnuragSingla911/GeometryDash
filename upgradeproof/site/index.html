@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UpgradeProof results</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Feasibility benchmark</p>
+    <h1>UpgradeProof</h1>
+    <p class="lede">One dependency, a bounded repair, and a record of what the tests actually showed.</p>
+  </header>
+  <main>
+    <section id="summary" class="cards"></section>
+    <section>
+      <h2>Challenge and adversarial cases</h2>
+      <div class="table-wrap">
+        <table id="cases">
+          <thead>
+            <tr>
+              <th>Case</th>
+              <th>Cohort</th>
+              <th>Mode</th>
+              <th>Verdict</th>
+              <th>Selector</th>
+              <th>Calls</th>
+              <th>Seconds</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <section>
+      <h2>Harness checks</h2>
+      <div class="table-wrap">
+        <table id="checks">
+          <thead>
+            <tr><th>Check</th><th>Passed</th><th>Detail</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <section id="notes"></section>
+  </main>
+  <script src="results.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

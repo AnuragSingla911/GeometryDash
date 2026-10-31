@@ -1,0 +1,11 @@
+{
+  "id": "already_failing",
+  "title": "The project already fails on the original dependency",
+  "dependency": {"name": "notelib", "from": "1.0.0", "to": "1.0.1"},
+  "expect": {"deterministic": "invalid_baseline", "cpu": "invalid_baseline"},
+  "package_dirs": {"from": "pkgs/1.0.0", "to": "pkgs/1.0.1"},
+  "sealed_tests": ["sealed"],
+  "allowed_prefixes": ["src/"],
+  "source": "newly-authored",
+  "authored": "2026-10-31"
+}
